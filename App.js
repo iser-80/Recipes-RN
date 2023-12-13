@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import AppNavigation from './src/navigation/appNavigation';
 import { useFonts } from 'expo-font'
+import { ThemeProvider } from './src/theme/theme';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -17,7 +18,9 @@ export default function App() {
       return null
    }
    return (
-     <AppNavigation />
+    <ThemeProvider>
+      <AppNavigation />
+    </ThemeProvider>
    )
 }
 
