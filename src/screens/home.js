@@ -12,57 +12,51 @@ export default function Home({ navigation }) {
   const { isDarkMode, toggleTheme } = useTheme();
   const [sideMenuVisible, setSideMenuVisible] = useState(false)
   const [data, setData] = useState([])
+  const [apiSearchedData, setApiSearchedData] = useState([])
+  const [mealTypes, setMealTypes] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
 
   // Recipes API
-  const API_KEY = 'c3c272cf89db45ebbcf4207164de867d'
-  const API_URL = 'https://api.spoonacular.com/recipes/random'
-  const [apiData, setApiData] = useState([])
+  // const API_KEY = '128a1fdd4d6d4c30b8bb35aa9ecbc053'
+  // const API_URL = 'https://api.spoonacular.com/recipes/random'
+  // const API_RBN = 'https://api.spoonacular.com/recipes/complexSearch'  
+
+  const API_URL = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
 
   useEffect(() => {
-    setData(recipes)
     fetchApiRecipes()
   }, [])
 
+
   const fetchApiRecipes = async () => {
     try {
-      const response = await fetch(`${API_URL}?apiKey=${API_KEY}&number=5`)
+      const response = await fetch(`${API_URL}`)
       const data = await response.json()
       if(data){
-        setApiData(data.recipes)
-        setData(data.recipes)
-        console.log(apiData)
+        setData(data.meals)
       }
     } catch (error) {
       console.error('error fetching api data : ', error)
     } 
   }
-
+  
   const handleSideMenuVisible = () => {
     setSideMenuVisible(!sideMenuVisible)
   }
 
-  // to modify according to the api call
-  const handleSearch = (query) => {
-    setSearchQuery(query)
-    const formatedQuery = searchQuery.toLowerCase()
-    const filtredData = filter(recipes, (recipe) => {
-      return contains(recipe, formatedQuery)
-    })
-    setData(filtredData)
-  }
+  // const handleSearchRecipe = async (query) => {
+  //   try {
+  //     const response = await fetch(`${API_RBN}?apiKey=${API_KEY}&query=${query}`)
+  //     const data = await response.json()
+  //     if(data){
+  //       setApiSearchedData(data)
+  //        console.log(apiSearchedData)
+  //     }
+  //   } catch (error) {
+  //     console.log('error white searching for recipies : ', error)
+  //   }
+  // }
 
-  const contains = (recipe, query) => {
-    if (recipe && recipe.title) {
-      const recipeTitle = recipe.title.toLowerCase();
-      const formattedQuery = query.toLowerCase();
-  
-      return recipeTitle.includes(formattedQuery);
-    }
-  
-    return false; 
-  };
-  
   return (
       <View className='flex-1' style={{backgroundColor: isDarkMode ? '#323031' : '#FFFFFF', padding: sideMenuVisible ? '0' : '5%'}}>
         <View className='flex flex-row items-center justify-between mt-4'>
@@ -81,11 +75,10 @@ export default function Home({ navigation }) {
         <View className='flex flex-row items-center bg-gray-100 py-3 px-4 mt-3 rounded-lg' style={{elevation: 3}}>
           <MagnifyingGlassIcon size={25} color='gray'/>
           <TextInput 
-            className='ml-4 w-full' 
+            className='ml-4 w-[90%]' 
             style={{fontFamily: 'poppins'}}
             placeholder='Search for your recipe'
             clearButtonMode='always'
-            // onChangeText={(query) => handleSearch(query)}
           />
         </View>
         <View className='my-2'>
@@ -103,7 +96,7 @@ export default function Home({ navigation }) {
         </View>
         <View className='flex-1 mt-3'>
             <FlatList
-              data={apiData}
+              data={data}
               renderItem={({ item }) => { return (
               <TouchableOpacity onPress={() => navigation.navigate('Recipe', {item})}>
                 <RecipeCard recipe={item}/>
@@ -126,35 +119,4 @@ const categories = [
   'Desserts',
   'BreakFast',
   'Snacks'
-]
-
-const recipes = [
-  {
-    title: 'Pizza Italiano',
-    description: 'The first thing you must do is preheat your oven up as high as it will go. It takes longer than you think to heat your oven up all the way! You want to give your oven at least 30 minutes to preheat. If you have a pizza stone, make sure its inside the preheating oven.',
-    image: require('../../assets/images/pizza.jpg'),
-    difficulty: 'easy',
-    time: '25'
-  },
-  {
-    title: 'Salade',
-    description: 'The first thing you must do is preheat your oven up as high as it will go. It takes longer than you think to heat your oven up all the way! You want to give your oven at least 30 minutes to preheat. If you have a pizza stone, make sure its inside the preheating oven.',
-    image: require('../../assets/images/salade.jpg'),
-    difficulty: 'medium',
-    time: '30'
-  },
-  {
-    title: 'Pizza Italiano',
-    description: 'The first thing you must do is preheat your oven up as high as it will go. It takes longer than you think to heat your oven up all the way! You want to give your oven at least 30 minutes to preheat. If you have a pizza stone, make sure its inside the preheating oven.',
-    image: require('../../assets/images/pizza.jpg'),
-    difficulty: 'easy',
-    time: '25'
-  },
-  {
-    title: 'Pizza Italiano',
-    description: 'The first thing you must do is preheat your oven up as high as it will go. It takes longer than you think to heat your oven up all the way! You want to give your oven at least 30 minutes to preheat. If you have a pizza stone, make sure its inside the preheating oven.',
-    image: require('../../assets/images/pizza.jpg'),
-    difficulty: 'easy',
-    time: '25'
-  },
 ]
