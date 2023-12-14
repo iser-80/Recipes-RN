@@ -14,14 +14,35 @@ export default function Home({ navigation }) {
   const [data, setData] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Recipes API
+  const API_KEY = 'c3c272cf89db45ebbcf4207164de867d'
+  const API_URL = 'https://api.spoonacular.com/recipes/random'
+  const [apiData, setApiData] = useState([])
+
   useEffect(() => {
     setData(recipes)
+    fetchApiRecipes()
   }, [])
+
+  const fetchApiRecipes = async () => {
+    try {
+      const response = await fetch(`${API_URL}?apiKey=${API_KEY}&number=5`)
+      const data = await response.json()
+      if(data){
+        setApiData(data.recipes)
+        setData(data.recipes)
+        console.log(apiData)
+      }
+    } catch (error) {
+      console.error('error fetching api data : ', error)
+    } 
+  }
 
   const handleSideMenuVisible = () => {
     setSideMenuVisible(!sideMenuVisible)
   }
 
+  // to modify according to the api call
   const handleSearch = (query) => {
     setSearchQuery(query)
     const formatedQuery = searchQuery.toLowerCase()
@@ -64,7 +85,7 @@ export default function Home({ navigation }) {
             style={{fontFamily: 'poppins'}}
             placeholder='Search for your recipe'
             clearButtonMode='always'
-            onChangeText={(query) => handleSearch(query)}
+            // onChangeText={(query) => handleSearch(query)}
           />
         </View>
         <View className='my-2'>
@@ -82,7 +103,7 @@ export default function Home({ navigation }) {
         </View>
         <View className='flex-1 mt-3'>
             <FlatList
-              data={searchQuery === '' ? recipes : data}
+              data={apiData}
               renderItem={({ item }) => { return (
               <TouchableOpacity onPress={() => navigation.navigate('Recipe', {item})}>
                 <RecipeCard recipe={item}/>

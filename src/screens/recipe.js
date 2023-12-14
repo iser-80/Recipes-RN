@@ -15,7 +15,7 @@ export default function Recipe({ route }) {
 
   return (
     <View className='flex-1 relative bg-white'>
-      <Image className='h-1/2 w-full' source={item.image}/>
+      <Image className='h-1/2 w-full' source={{uri: item.image}}/>
       <View className='absolute mt-7 px-3 flex flex-row justify-between w-full'>
         <TouchableOpacity onPress={() => naviagation.navigate('Home')} className='p-4 rounded-3xl' style={{backgroundColor: 'rgba(255, 255, 255, 0.3)'}}>
             <ArrowSmallLeftIcon size={30} color='white' opacity='100%' />
@@ -30,11 +30,11 @@ export default function Recipe({ route }) {
             <View className='flex flex-row mt-5 justify-between' >
                 <View className='w-[30%] py-4 px-2 items-center bg-green-300 rounded-3xl'>
                     <ClockIcon size={50} color='green'/>
-                    <Text className='text-lg mt-1 text-green-800' style={{fontFamily: 'poppins'}}>{item.time} min</Text>
+                    <Text className='text-lg mt-1 text-green-800' style={{fontFamily: 'poppins'}}>{item.readyInMinutes} min</Text>
                 </View>
                 <View className='w-[30%] py-4 px-2 items-center bg-yellow-300 rounded-3xl'>
                     <StarIcon size={50} color='yellow'/>
-                    <Text className='text-lg mt-1 text-yellow-800' style={{fontFamily: 'poppins'}}>{item.difficulty}</Text>
+                    <Text className='text-lg mt-1 text-yellow-800' style={{fontFamily: 'poppins'}}>{item.healthScore}</Text>
                 </View>
                 <View className='w-[30%] py-4 px-2 items-center bg-blue-300 rounded-3xl'>
                     <FireIcon size={50} color='blue'/>
