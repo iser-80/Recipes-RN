@@ -17,10 +17,10 @@ export default function Recipe({ route }) {
     <View className='flex-1 relative bg-white'>
       <Image className='h-1/2 w-full' source={item.image}/>
       <View className='absolute mt-7 px-3 flex flex-row justify-between w-full'>
-        <TouchableOpacity onPress={() => naviagation.navigate('Home')} className='p-5 bg-white opacity-40 rounded-3xl'>
+        <TouchableOpacity onPress={() => naviagation.navigate('Home')} className='p-4 rounded-3xl' style={{backgroundColor: 'rgba(255, 255, 255, 0.3)'}}>
             <ArrowSmallLeftIcon size={30} color='white' opacity='100%' />
         </TouchableOpacity>
-        <TouchableOpacity className='p-5 bg-white opacity-40 rounded-3xl'>
+        <TouchableOpacity className='p-4 rounded-3xl' style={{backgroundColor: 'rgba(255, 255, 255, 0.3)'}}>
             <BookmarkIcon size={30} color='white' />
         </TouchableOpacity>
       </View>

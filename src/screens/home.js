@@ -1,24 +1,59 @@
 import { View, Text, TextInput, FlatList, Keyboard } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { MoonIcon } from 'react-native-heroicons/outline'
 import { Bars3BottomLeftIcon, MagnifyingGlassIcon } from 'react-native-heroicons/solid'
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
 import RecipeCard from '../components/recipeCard'
 import { useTheme } from '../theme/theme'
+import SideMenu from '../sideBar/sideMenu'
+import filter from 'lodash.filter'
 
 export default function Home({ navigation }) {
   const { isDarkMode, toggleTheme } = useTheme();
+  const [sideMenuVisible, setSideMenuVisible] = useState(false)
+  const [data, setData] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
 
+  useEffect(() => {
+    setData(recipes)
+  }, [])
+
+  const handleSideMenuVisible = () => {
+    setSideMenuVisible(!sideMenuVisible)
+  }
+
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    const formatedQuery = searchQuery.toLowerCase()
+    const filtredData = filter(recipes, (recipe) => {
+      return contains(recipe, formatedQuery)
+    })
+    setData(filtredData)
+  }
+
+  const contains = (recipe, query) => {
+    if (recipe && recipe.title) {
+      const recipeTitle = recipe.title.toLowerCase();
+      const formattedQuery = query.toLowerCase();
+  
+      return recipeTitle.includes(formattedQuery);
+    }
+  
+    return false; 
+  };
+  
   return (
-      <View className='flex-1 p-5' style={{backgroundColor: isDarkMode ? '#323031' : '#FFFFFF'}}>
+      <View className='flex-1' style={{backgroundColor: isDarkMode ? '#323031' : '#FFFFFF', padding: sideMenuVisible ? '0' : '5%'}}>
         <View className='flex flex-row items-center justify-between mt-4'>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleSideMenuVisible}>
             <Bars3BottomLeftIcon size={30} color={isDarkMode ? 'white' : 'black'}/>
           </TouchableOpacity>
           <TouchableOpacity onPress={toggleTheme}>
             <MoonIcon size={30} color={isDarkMode ? 'white' : 'black'} fill='white' />
           </TouchableOpacity>
         </View>
+        
+
         <Text className='text-4xl pr-[20%] mt-5' style={{fontFamily: 'kalnia-semiBold', color: isDarkMode ? 'white' : 'black'}}>
           What Would You Like To Cook Today ?
         </Text>
@@ -28,6 +63,8 @@ export default function Home({ navigation }) {
             className='ml-4 w-full' 
             style={{fontFamily: 'poppins'}}
             placeholder='Search for your recipe'
+            clearButtonMode='always'
+            onChangeText={(query) => handleSearch(query)}
           />
         </View>
         <View className='my-2'>
@@ -45,7 +82,7 @@ export default function Home({ navigation }) {
         </View>
         <View className='flex-1 mt-3'>
             <FlatList
-              data={recipes}
+              data={searchQuery === '' ? recipes : data}
               renderItem={({ item }) => { return (
               <TouchableOpacity onPress={() => navigation.navigate('Recipe', {item})}>
                 <RecipeCard recipe={item}/>
@@ -54,6 +91,7 @@ export default function Home({ navigation }) {
               showsVerticalScrollIndicator={false}
             />
         </View>
+        {sideMenuVisible && <SideMenu closeSideMenu={() => setSideMenuVisible(false)} />}
       </View>
   )
 }
