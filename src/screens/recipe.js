@@ -57,7 +57,7 @@ export default function Recipe({ route }) {
                 </View>
             </View>
             <View className='mt-4'>
-                <Text className='text-lg' style={{fontFamily: 'poppins-semiBold', color: isDarkMode && 'white'}}>Ingrediens :</Text>
+                <Text className='text-lg pl-2 border-l-2 border-black' style={{fontFamily: 'poppins-semiBold', color: isDarkMode && 'white'}}>Ingrediens :</Text>
                 {ingredients.length > 0 ? (
         <View className='mt-2'>
           {ingredients.map((ingredient, index) => (

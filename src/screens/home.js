@@ -1,4 +1,4 @@
-import { View, Text, TextInput, FlatList, Keyboard } from 'react-native'
+import { View, Text, TextInput, FlatList, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { MoonIcon } from 'react-native-heroicons/outline'
 import { Bars3BottomLeftIcon, MagnifyingGlassIcon } from 'react-native-heroicons/solid'
@@ -16,18 +16,32 @@ export default function Home({ navigation }) {
   const [filteredData, setFilteredData] = useState([])
   const [updateData, setUpdateData] = useState(false)
   const [activeCat, setActiveCat] = useState(null)
+  const [searchedMeal, setSearchedMeal] = useState(null);
+
+  const [isLoading, setLoading] = useState(true);
 
   const API_URL = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
   const API_CAT_URL = 'https://www.themealdb.com/api/json/v1/1/categories.php'
   const API_FIL_CAT = 'https://www.themealdb.com/api/json/v1/1/filter.php?c='
   const API_FIL_ID = 'https://www.themealdb.com/api/json/v1/1/lookup.php?i='
+  const API_FIL_NAME = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
 
   useEffect(() => {
     fetchApiRecipes()
     fetchAllMealCategories()
   }, [])
 
+  useEffect(() => {
+    if (searchedMeal) {
+      fetchMealBySearch(searchedMeal);
+    } else if (activeCat) {
+      fetchMealsByCategory(activeCat);
+    } else {
+      setFilteredData(data);
+    }
+  }, [searchedMeal, activeCat, data]);
 
+  // fetch all the meals from api
   const fetchApiRecipes = async () => {
     try {
       const response = await fetch(`${API_URL}`)
@@ -37,9 +51,26 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
       console.error('error fetching api data : ', error)
-    } 
+    } finally {
+      setLoading(false); // Set loading to false when the data is fetched (success or failure)
+    }
   }
 
+  // fetch a meal from search by name from api
+const fetchMealBySearch = async (meal) => {
+  try {
+    const response = await fetch(`${API_FIL_NAME}${meal}`);
+    const data = await response.json(); // Add 'await' here
+    if (data && data.meals) {
+      setFilteredData(data.meals);
+    }
+  } catch (error) {
+    console.error('error while fetching for meals by name', error);
+  }
+};
+
+
+  // fetch all the categories of the meals from api
   const fetchAllMealCategories = async () => {
     try {
       const response = await fetch(`${API_CAT_URL}`);
@@ -53,6 +84,7 @@ export default function Home({ navigation }) {
     }
   };
 
+  // fetch a meal by id from api
   const fetchMealById = async ( id ) => {
     try {
       const response = await fetch(`${API_FIL_ID}${id}`)
@@ -66,7 +98,9 @@ export default function Home({ navigation }) {
     }
   }
   
+  // fetch a meal or more by category
   const fetchMealsByCategory = async (category) => {
+    setLoading(true)
     try {
       const response = await fetch(`${API_FIL_CAT}${category}`);
       const data = await response.json();
@@ -86,6 +120,8 @@ export default function Home({ navigation }) {
       }
     } catch (error) {
       console.error('Error while fetching meals by category:', error);
+    } finally {
+      setLoading(false); // Set loading to false when the data is fetched (success or failure)
     }
   };
   
@@ -93,7 +129,7 @@ export default function Home({ navigation }) {
   const handleSideMenuVisible = () => {
     setSideMenuVisible(!sideMenuVisible)
   }
-
+  
 
   return (
       <View className='flex-1' style={{backgroundColor: isDarkMode ? '#323031' : '#FFFFFF', padding: sideMenuVisible ? '0' : '5%'}}>
@@ -117,12 +153,14 @@ export default function Home({ navigation }) {
             style={{fontFamily: 'poppins'}}
             placeholder='Search for your recipe'
             clearButtonMode='always'
+            onChangeText={(meal) => setSearchedMeal(meal)}
           />
         </View>
         <View className='my-2'>
           <FlatList
             className='py-2'
             data={mealCategories}
+            keyExtractor={(item, index) => index.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({item}) => { 
@@ -137,7 +175,8 @@ export default function Home({ navigation }) {
         </View>
         <View className='flex-1 mt-3'>
             <FlatList
-              data={updateData ? filteredData : data}
+              data={filteredData}
+              keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => { return (
               <TouchableOpacity onPress={() => navigation.navigate('Recipe', {item})}>
                 <RecipeCard recipe={item}/>
