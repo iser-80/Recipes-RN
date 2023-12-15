@@ -1,12 +1,13 @@
-import { View, Text } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, Alert, Button } from 'react-native'
+import React, { useEffect, useState,  useCallback, useRef } from 'react'
 import { Image } from 'react-native'
 import { ScrollView } from 'react-native'
-import { ArrowSmallLeftIcon, MapPinIcon, FireIcon, StarIcon } from 'react-native-heroicons/solid'
+import { ArrowSmallLeftIcon, MapPinIcon, FireIcon, StarIcon, CheckIcon, PlusSmallIcon } from 'react-native-heroicons/solid'
 import { TouchableOpacity } from 'react-native'
 import { BookmarkIcon } from 'react-native-heroicons/outline'
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/theme'
+
 
 export default function Recipe({ route }) {
     const {item} = route.params
@@ -48,7 +49,7 @@ export default function Recipe({ route }) {
             <View className='flex flex-row mt-5 justify-between' >
                 <View className='w-[45%] py-4 px-2 items-center bg-green-300 rounded-3xl'>
                     <FireIcon size={40} color='green'/>
-                    <Text className='text-lg mt-1 text-green-800' style={{fontFamily: 'poppins'}}>{item.strCategory} min</Text>
+                    <Text className='text-lg mt-1 text-green-800' style={{fontFamily: 'poppins'}}>{item.strCategory}</Text>
                 </View>
                 <View className='w-[45%] py-4 px-2 items-center bg-red-300 rounded-3xl'>
                     <MapPinIcon size={40} color='red'/>
@@ -58,27 +59,31 @@ export default function Recipe({ route }) {
             <View className='mt-4'>
                 <Text className='text-lg' style={{fontFamily: 'poppins-semiBold', color: isDarkMode && 'white'}}>Ingrediens :</Text>
                 {ingredients.length > 0 ? (
-        <View>
+        <View className='mt-2'>
           {ingredients.map((ingredient, index) => (
-            <Text
-              key={index}
-              className='text-md'
-              style={{ fontFamily: 'poppins', color: isDarkMode && 'white' }}
-            >
-              {ingredient}
+            <View className='flex flex-row items-center mt-1'>
+              <CheckIcon size={15} color='black'/>
+              <Text
+                key={index}
+                className='text-base ml-2'
+                style={{ fontFamily: 'poppins', color: isDarkMode && 'white' }}
+              >
+                {ingredient}
+              </Text>
+            </View>
+            ))}
+          </View>
+          ) : (
+            <Text className='text-md' style={{ fontFamily: 'poppins', color: isDarkMode && 'white' }}>
+              No ingredients available.
             </Text>
-          ))}
-        </View>
-        ) : (
-          <Text className='text-md' style={{ fontFamily: 'poppins', color: isDarkMode && 'white' }}>
-            No ingredients available.
-          </Text>
-      )}
+          )}
             </View>
             <View className='mt-4'>
                 <Text className='text-lg' style={{fontFamily: 'poppins-semiBold', color: isDarkMode && 'white'}}>Description :</Text>
-                <Text className='text-md' style={{fontFamily: 'poppins', color: isDarkMode && 'white'}}>{item.description}</Text>
+                <Text className='text-base px-2 mt-1' style={{fontFamily: 'poppins', color: isDarkMode && 'white'}}>{item.strInstructions}</Text>
             </View>
+
         </ScrollView>
       </View>
     </View>

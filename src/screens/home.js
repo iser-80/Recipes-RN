@@ -12,19 +12,19 @@ export default function Home({ navigation }) {
   const { isDarkMode, toggleTheme } = useTheme();
   const [sideMenuVisible, setSideMenuVisible] = useState(false)
   const [data, setData] = useState([])
-  const [apiSearchedData, setApiSearchedData] = useState([])
-  const [mealTypes, setMealTypes] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
-
-  // Recipes API
-  // const API_KEY = '128a1fdd4d6d4c30b8bb35aa9ecbc053'
-  // const API_URL = 'https://api.spoonacular.com/recipes/random'
-  // const API_RBN = 'https://api.spoonacular.com/recipes/complexSearch'  
+  const [mealCategories, setMealCategories] = useState([])
+  const [filteredData, setFilteredData] = useState([])
+  const [updateData, setUpdateData] = useState(false)
+  const [activeCat, setActiveCat] = useState(null)
 
   const API_URL = 'https://www.themealdb.com/api/json/v1/1/search.php?s='
+  const API_CAT_URL = 'https://www.themealdb.com/api/json/v1/1/categories.php'
+  const API_FIL_CAT = 'https://www.themealdb.com/api/json/v1/1/filter.php?c='
+  const API_FIL_ID = 'https://www.themealdb.com/api/json/v1/1/lookup.php?i='
 
   useEffect(() => {
     fetchApiRecipes()
+    fetchAllMealCategories()
   }, [])
 
 
@@ -39,23 +39,61 @@ export default function Home({ navigation }) {
       console.error('error fetching api data : ', error)
     } 
   }
+
+  const fetchAllMealCategories = async () => {
+    try {
+      const response = await fetch(`${API_CAT_URL}`);
+      const data = await response.json();
+      
+      if (data && data.categories) {
+        setMealCategories(data.categories)
+      }
+    } catch (error) {
+      console.error('Error fetching meal categories:', error);
+    }
+  };
+
+  const fetchMealById = async ( id ) => {
+    try {
+      const response = await fetch(`${API_FIL_ID}${id}`)
+      const data = await response.json()
+      if(data && data.meals){
+        return data.meals
+      }
+    } catch (error) {
+      console.error('error while fetching for meals by id : ', error)
+      return null
+    }
+  }
+  
+  const fetchMealsByCategory = async (category) => {
+    try {
+      const response = await fetch(`${API_FIL_CAT}${category}`);
+      const data = await response.json();
+  
+      if (data && data.meals) {
+        const mealPromises = data.meals.map(async (meal) => {
+          const response = await fetchMealById(meal.idMeal);
+          return response;
+        });
+  
+        const updatedData = await Promise.all(mealPromises);
+        const flattenedData = updatedData.flat();
+        setFilteredData(flattenedData);
+        
+        setActiveCat(category)
+        setUpdateData(true)
+      }
+    } catch (error) {
+      console.error('Error while fetching meals by category:', error);
+    }
+  };
+  
   
   const handleSideMenuVisible = () => {
     setSideMenuVisible(!sideMenuVisible)
   }
 
-  // const handleSearchRecipe = async (query) => {
-  //   try {
-  //     const response = await fetch(`${API_RBN}?apiKey=${API_KEY}&query=${query}`)
-  //     const data = await response.json()
-  //     if(data){
-  //       setApiSearchedData(data)
-  //        console.log(apiSearchedData)
-  //     }
-  //   } catch (error) {
-  //     console.log('error white searching for recipies : ', error)
-  //   }
-  // }
 
   return (
       <View className='flex-1' style={{backgroundColor: isDarkMode ? '#323031' : '#FFFFFF', padding: sideMenuVisible ? '0' : '5%'}}>
@@ -84,19 +122,22 @@ export default function Home({ navigation }) {
         <View className='my-2'>
           <FlatList
             className='py-2'
-            data={categories}
+            data={mealCategories}
             horizontal
             showsHorizontalScrollIndicator={false}
-            renderItem={({item}) =>{ return (
-              <TouchableOpacity className='mx-1 py-2 px-4 rounded-full bg-gray-100'>
-                <Text className='text-sm' style={{fontFamily: 'poppins'}}>{item}</Text>
-              </TouchableOpacity>
-            )}}
+            renderItem={({item}) => { 
+              const isActive = item.strCategory === activeCat
+
+              return (
+                <TouchableOpacity onPress={() => fetchMealsByCategory(item.strCategory)} className='mx-1 py-2 px-4 rounded-full bg-gray-100'>
+                  <Text className={`text-sm ${isActive ? 'text-blue-500' : 'text-gray-700'}`}  style={{fontFamily: 'poppins'}}>{item.strCategory}</Text>
+                </TouchableOpacity>
+              )}}
           />
         </View>
         <View className='flex-1 mt-3'>
             <FlatList
-              data={data}
+              data={updateData ? filteredData : data}
               renderItem={({ item }) => { return (
               <TouchableOpacity onPress={() => navigation.navigate('Recipe', {item})}>
                 <RecipeCard recipe={item}/>
@@ -110,13 +151,3 @@ export default function Home({ navigation }) {
   )
 }
 
-const categories = [
-  'All',
-  'Appetizers',
-  'Main Dishes',
-  'Salads',
-  'Soups',
-  'Desserts',
-  'BreakFast',
-  'Snacks'
-]
